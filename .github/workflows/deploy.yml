@@ -24,4 +24,11 @@ jobs:
         run: find src -name "*.js" -exec node --check {} \;
 
       - name: Desplegar en Render
-        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "::warning::Falta el secreto RENDER_DEPLOY_HOOK_URL en el environment 'dev'. Se omite el despliegue."
+            exit 0
+          fi
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
