@@ -7,7 +7,19 @@ const validarId = (id) => {
     return numero;
 };
 
-const listar = () => productoRepository.findAll();
+// Si viene un nombre busca por coincidencia; si viene vacío lista todos
+const listar = (nombre) => {
+    const texto = typeof nombre === 'string' ? nombre.trim() : '';
+    if (texto) return productoRepository.findByNombre(texto);
+    return productoRepository.findAll();
+};
+
+// Productos con stock menor o igual al límite; si no se envía límite usa 5
+const listarStockBajo = (limite) => {
+    const valor = limite === undefined || limite === '' ? 5 : Number(limite);
+    if (!Number.isInteger(valor) || valor < 0) throw new HttpError(400, 'El limite debe ser un entero mayor o igual a 0');
+    return productoRepository.findByStockMaximo(valor);
+};
 
 const obtenerPorId = async (id) => {
     const producto = await productoRepository.findById(validarId(id));
@@ -32,4 +44,4 @@ const eliminar = async (id) => {
     if (!eliminado) throw new HttpError(404, 'Producto no encontrado');
 };
 
-module.exports = { listar, obtenerPorId, crear, actualizar, eliminar };
+module.exports = { listar, listarStockBajo, obtenerPorId, crear, actualizar, eliminar };
